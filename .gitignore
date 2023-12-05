@@ -1,0 +1,11 @@
+# ignore trials folder
+/_trials
+
+# ignore outs folder
+/_outputs
+
+# ignore python cache folders
+*__pycache__
+
+# ignore test files for now
+_test_files
