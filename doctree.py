@@ -7,20 +7,21 @@ import pygraphviz as pgv
 
 class EpcNode(ABC):
     _description: str
+    _start: str
+    _end: str
     next: Optional[Self]
 
     def __init__(self, description: str, next: Self | None = None) -> None:
         self._description = description
         self.next = next
+        self._start = description
+        self._end = description
 
     @abstractmethod
     def add_node(self, pygraph: pgv.AGraph, description: str):
         pass
 
-    def draw_line(
-        self,
-        pygraph: pgv.AGraph,
-    ):
+    def draw_line(self, pygraph: pgv.AGraph, end_id: str = None):
         self.add_node(pygraph, self._description)
         if self.next:
             pygraph.add_edge(self._description, self.next._description)
@@ -56,7 +57,7 @@ class IfNode(EpcNode):
     branches: list[EpcNode]
 
     def __init__(
-        self, description: str, next: Self | None = None, branches: list[Self] = []
+        self, description: str, next: Self | None = None, branches: list[EpcNode] = []
     ) -> None:
         super().__init__(description, next)
         self.branches = branches
@@ -66,24 +67,27 @@ class IfNode(EpcNode):
             description, label="X", color="gray", height="0.2", width="0.2"
         )
 
-    def draw_line(self, pygraph: pgv.AGraph):
+    def draw_line(self, pygraph: pgv.AGraph, end_id: str = None):
         if self.branches:
-            end_if_id = uuid4()
-            self.add_node(pygraph, self._description)
-            self.add_node(pygraph, end_if_id)
+            self._end = uuid4()
+            self.add_node(pygraph, self._start)
+            self.add_node(pygraph, self._end)
 
         for branch in self.branches:
             pygraph.add_edge(self._description, branch._description)
 
             while branch:
-                branch.draw_line(pygraph)
+                branch.draw_line(pygraph=pygraph, end_id=self._end)
 
                 if not branch.next:
-                    pygraph.add_edge(branch._description, end_if_id)
+                    pygraph.add_edge(branch._end, self._end)
                 branch = branch.next
 
             if self.next:
-                pygraph.add_edge(end_if_id, self.next._description)
+                pygraph.add_edge(self._end, self.next._description)
+
+            if not self.next and end_id:
+                pygraph.add_edge(self._end, end_id)
 
 
 class EpcDiagram:
