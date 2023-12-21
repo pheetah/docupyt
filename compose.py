@@ -6,7 +6,7 @@ from pygraphviz import AGraph
 
 from doctree import ActivityNode, EpcDiagram, EpcNode, EventNode, IfNode
 from logs import log
-from settings.language import Keywords
+from settings.language import ContextKeywords, Keywords
 
 G = AGraph(directed=True)
 
@@ -18,7 +18,13 @@ class DiagramNodeAdder:
     def _handle_activity(self, token: str, diagram: EpcDiagram) -> EpcNode:
         if Keywords.ACTIVITY in token:
             raw_action = self._get_after(token, Keywords.ACTIVITY)
-            diagram.push(ActivityNode(description=raw_action))
+            node = ActivityNode(description=raw_action)
+
+            if ContextKeywords.DATABASE in token:
+                db = self._get_after(token, ContextKeywords.DATABASE)
+                node.set_database_connection(database=db)
+
+            diagram.push(node)
 
     def _handle_event(self, token: str, diagram: EpcDiagram) -> EpcNode:
         if Keywords.EVENT in token:

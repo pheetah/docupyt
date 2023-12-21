@@ -12,3 +12,7 @@ class Keywords(StringEnum):
     IF = "IF"
     ELSE = "ELSE"
     ENDIF = "END"
+
+
+class ContextKeywords(StringEnum):
+    DATABASE = "*|"

@@ -11,7 +11,7 @@
 
 # ignore test files for now
 _test_files
-
+test_cli.py
 
 ## PYTHON
 
