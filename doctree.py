@@ -29,7 +29,7 @@ class EpcNode(ABC):
             color="orange",
             height="0.25",
             width="0.10",
-            shape="tab",
+            shape="cylinder",
             style="filled",
             margin="0.1",
             fontcolor="white",
@@ -67,7 +67,7 @@ class ActivityNode(EpcNode):
             fontcolor="black",
             style="filled",
             fontsize=16,
-            width=2,
+            width=4,
             group="1",
         )
 
@@ -80,8 +80,9 @@ class EventNode(EpcNode):
             shape="octagon",
             fontcolor="white",
             style="filled",
-            fontsize=16,
-            width=2,
+            width=1.0,
+            height=0.6,
+            fixedsize=False,
             group="1",
         )
 
