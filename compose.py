@@ -13,7 +13,7 @@ G = AGraph(directed=True)
 
 class DiagramNodeAdder:
     def _get_after(self, string: str, keyword: str):
-        return string.split(keyword, 1)[1]
+        return string.split(keyword, 1)[1].lstrip()
 
     def _handle_activity(self, token: str, diagram: EpcDiagram) -> EpcNode:
         if Keywords.ACTIVITY in token:

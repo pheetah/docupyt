@@ -15,4 +15,4 @@ class Keywords(StringEnum):
 
 
 class ContextKeywords(StringEnum):
-    DATABASE = "*|"
+    DATABASE = "[=]"
