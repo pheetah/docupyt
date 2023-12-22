@@ -47,10 +47,7 @@ class TestNodeAdder(TestCase):
         self.node_adder._handle_activity(token=TOKEN, diagram=diagram)
 
         # After
-        # FIXME temporarily pass tests
-        assert diagram.head._description == (
-            "retrieve data from geo service" " [=] GEODB.LOCATIONS"
-        )
+        assert diagram.head._description == "retrieve data from geo service"
         assert diagram.head._database == "GEODB.LOCATIONS"
         assert diagram.head.next is None
 

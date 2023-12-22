@@ -16,3 +16,13 @@ class Keywords(StringEnum):
 
 class ContextKeywords(StringEnum):
     DATABASE = "[=]"
+
+
+SYMBOLS = [
+    Keywords.ACTIVITY,
+    Keywords.EVENT,
+    Keywords.IF,
+    Keywords.ELSE,
+    Keywords.ENDIF,
+    ContextKeywords.DATABASE,
+]

@@ -1,4 +1,5 @@
 import copy
+import re
 from uuid import uuid4
 
 from code_tokenize.tokens import TokenSequence
@@ -6,14 +7,35 @@ from pygraphviz import AGraph
 
 from doctree import ActivityNode, EpcDiagram, EpcNode, EventNode, IfNode
 from logs import log
-from settings.language import ContextKeywords, Keywords
+from settings.language import SYMBOLS, ContextKeywords, Keywords
 
 G = AGraph(directed=True)
 
 
 class DiagramNodeAdder:
-    def _get_after(self, string: str, keyword: str):
-        return string.split(keyword, 1)[1].lstrip()
+    def _process_regex_sentitivity(self, keyword: str):
+        processed = keyword.replace("[", r"\[").replace("]", r"\]")
+        return processed
+
+    def _search_exact_regex(self, regex: str, token: str):
+        result = re.search(regex, token)
+        return result[0] if result else None
+
+    def _extract(self, token: str, keyword: str, until_one_of: list):
+        rules = "|".join(until_one_of)
+        processed_keyword = self._process_regex_sentitivity(keyword=keyword)
+        processed_rules = self._process_regex_sentitivity(keyword=rules)
+        return self._search_exact_regex(
+            regex=rf"(?<={processed_keyword})(.*?)(?=({processed_rules}|$))",
+            token=token,
+        )
+
+    def _get_after(self, token: str, keyword: str):
+        return (
+            self._extract(token=token, keyword=keyword, until_one_of=SYMBOLS)
+            .lstrip()
+            .rstrip()
+        )
 
     def _handle_activity(self, token: str, diagram: EpcDiagram) -> EpcNode:
         if Keywords.ACTIVITY in token:
