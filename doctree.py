@@ -16,6 +16,27 @@ class EpcNode(ABC):
         self.next = next
         self._start = description
         self._end = description
+        self._database = None
+
+    def set_database_connection(self, database: str):
+        self._database = database
+
+    def add_db_node(self, pygraph: pgv.AGraph, description: str, group: str):
+        id = uuid4()
+        pygraph.add_node(
+            id,
+            label=description,
+            color="orange",
+            height="0.25",
+            width="0.10",
+            shape="tab",
+            style="filled",
+            margin="0.1",
+            fontcolor="white",
+            group=group,
+        )
+
+        return id
 
     @abstractmethod
     def add_node(self, pygraph: pgv.AGraph, description: str):
@@ -25,6 +46,16 @@ class EpcNode(ABC):
         self.add_node(pygraph, self._description)
         if self.next:
             pygraph.add_edge(self._description, self.next._description)
+
+        if self._database:
+            graph = pygraph.add_subgraph(
+                [self._description, self._database, "yarak"],
+                name=self._description + self._database,
+            )
+            db_id = self.add_db_node(
+                pygraph=graph, description=self._database, group=self._description
+            )
+            graph.add_edge(self._description, db_id)
 
 
 class ActivityNode(EpcNode):
@@ -37,6 +68,7 @@ class ActivityNode(EpcNode):
             style="filled",
             fontsize=16,
             width=2,
+            group="1",
         )
 
 
@@ -50,6 +82,7 @@ class EventNode(EpcNode):
             style="filled",
             fontsize=16,
             width=2,
+            group="1",
         )
 
 
@@ -64,7 +97,12 @@ class IfNode(EpcNode):
 
     def add_node(self, pygraph: pgv.AGraph, description: str):
         pygraph.add_node(
-            description, label="X", color="gray", height="0.2", width="0.2"
+            description,
+            label="X",
+            color="gray",
+            height="0.2",
+            width="0.2",
+            group="1",
         )
 
     def draw_line(self, pygraph: pgv.AGraph, end_id: str = None):
