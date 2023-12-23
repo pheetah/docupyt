@@ -16,6 +16,8 @@ class Keywords(StringEnum):
 
 class ContextKeywords(StringEnum):
     DATABASE = "[=]"
+    API_CALL_OUT = "->"
+    API_CALL_IN = "<-"
 
 
 SYMBOLS = [
@@ -25,4 +27,6 @@ SYMBOLS = [
     Keywords.ELSE,
     Keywords.ENDIF,
     ContextKeywords.DATABASE,
+    ContextKeywords.API_CALL_OUT,
+    ContextKeywords.API_CALL_IN,
 ]

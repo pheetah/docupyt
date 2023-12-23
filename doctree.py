@@ -49,7 +49,7 @@ class EpcNode(ABC):
 
         if self._database:
             graph = pygraph.add_subgraph(
-                [self._description, self._database, "yarak"],
+                [self._description, self._database],
                 name=self._description + self._database,
             )
             db_id = self.add_db_node(
@@ -59,6 +59,67 @@ class EpcNode(ABC):
 
 
 class ActivityNode(EpcNode):
+    def __init__(self, description: str, next: Self | None = None) -> None:
+        super().__init__(description, next)
+        self._incoming_api_calls: list[str] = []
+        self._outgoing_api_calls: list[str] = []
+
+    def _parse_api_call(self, api_call: str) -> list[str]:
+        return api_call.lstrip().rstrip().split(",")
+
+    def set_incoming_api_call(self, api_call: str):
+        calls = self._parse_api_call(api_call)
+        self._incoming_api_calls = calls
+
+    def set_outgoing_api_call(self, api_call: str):
+        calls = self._parse_api_call(api_call)
+        self._outgoing_api_calls = calls
+
+    def add_api_call_node(
+        self,
+        pygraph: pgv.AGraph,
+        incoming_api_calls: list[str],
+        outgoing_api_calls: list[str],
+        group: str,
+    ):
+        id = uuid4()
+
+        incoming = "".join(
+            [
+                f"<tr> <td> <i> &#8592; {call.lstrip().rstrip()} </i> </td> </tr>"
+                for call in incoming_api_calls
+            ]
+        )
+        outgoing = "".join(
+            [
+                f"<tr> <td> <i> &#8594; {call.lstrip().rstrip()} </i> </td> </tr>"
+                for call in outgoing_api_calls
+            ]
+        )
+
+        label = (
+            "<<table border='0' cellborder='1' cellspacing='0'>"
+            "<tr> <td> API CALL </td> </tr>"
+            f"{outgoing}"
+            f"{incoming}"
+            "</table>>"
+        )
+
+        pygraph.add_node(
+            id,
+            label=label,
+            color="orange2",
+            height=0.45,
+            width=0.2,
+            shape="component",
+            margin="0.1",
+            fontcolor="royalblue3",
+            fontsize=12,
+            group=group,
+        )
+
+        return id
+
     def add_node(self, pygraph: pgv.AGraph, description: str):
         pygraph.add_node(
             description,
@@ -70,6 +131,27 @@ class ActivityNode(EpcNode):
             width=4,
             group="1",
         )
+
+    def draw_line(self, pygraph: pgv.AGraph, end_id: str = None):
+        super().draw_line(pygraph, end_id)
+
+        if self._incoming_api_calls or self._outgoing_api_calls:
+            cluster = (
+                [self._description]
+                + self._incoming_api_calls
+                + self._outgoing_api_calls
+            )
+            graph = pygraph.add_subgraph(
+                cluster,
+                name=self._description + "apicalls",
+            )
+            api_call_id = self.add_api_call_node(
+                pygraph=graph,
+                incoming_api_calls=self._incoming_api_calls,
+                outgoing_api_calls=self._outgoing_api_calls,
+                group=self._description,
+            )
+            graph.add_edge(self._description, api_call_id)
 
 
 class EventNode(EpcNode):
