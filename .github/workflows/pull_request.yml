@@ -6,7 +6,7 @@ on:
 
 jobs:
 
-  setup:
+  test:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -14,13 +14,7 @@ jobs:
       with:
         python-version: '3.11'
         cache: 'pip'
-    - run: pip install -r requirements.txt
-
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-      - run: pytest -o log_cli=true -o -vv
+    run: |
+      python -m pip install --upgrade pip
+      pip install -r requirements.txt
+      python -m pytest -o log_cli=true -s -vv --cov
