@@ -88,6 +88,8 @@ class DiagramNodeAdder:
         if_node = copy.deepcopy(IfNode(uuid4()))
         current_branch = copy.deepcopy(EpcDiagram())
 
+        self._handle_flow(token=first_element, diagram=current_branch)
+
         depth_inner_processed_index = None
         depth_latest_index = None
 
@@ -113,11 +115,11 @@ class DiagramNodeAdder:
                     current_branch.push(depth_if)
                     continue
 
-            self._handle_flow(token=token, diagram=current_branch)
-
             if Keywords.ELSE in token:
                 if_node.branches.append(current_branch.head)
                 current_branch = EpcDiagram()
+
+            self._handle_flow(token=token, diagram=current_branch)
 
             if Keywords.ENDIF in token:
                 if_node.branches.append(current_branch.head)
