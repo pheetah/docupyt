@@ -1,10 +1,20 @@
 name: Pull Request Testing
 
-steps:
-- uses: actions/checkout@v4
-- uses: actions/setup-python@v4
-  with:
-    python-version: '3.11'
-    cache: 'pip'
-- run: pip install -r requirements.txt
-- run: pip test
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  setup:
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    - run: pip install -r requirements.txt
+
+  test:
+    steps:
+      - uses: actions/checkout@v4
+      - run: pytest -o log_cli=true -o -vv
