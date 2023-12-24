@@ -17,4 +17,7 @@ jobs:
   test:
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
       - run: pytest -o log_cli=true -o -vv
