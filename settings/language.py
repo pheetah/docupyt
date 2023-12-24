@@ -7,11 +7,11 @@ class StringEnum(str, Enum):
 
 
 class Keywords(StringEnum):
-    ACTIVITY = "ACTIVITY"
-    EVENT = "EVENT"
-    IF = "IF"
-    ELSE = "ELSE"
-    ENDIF = "END"
+    ACTIVITY = "act:"
+    EVENT = "event:"
+    IF = "if:"
+    ELSE = "else:"
+    ENDIF = "end:"
 
 
 class ContextKeywords(StringEnum):
