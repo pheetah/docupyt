@@ -46,6 +46,14 @@ class DiagramNodeAdder:
                 db = self._get_after(token, ContextKeywords.DATABASE)
                 node.set_database_connection(database=db)
 
+            if ContextKeywords.API_CALL_IN in token:
+                call = self._get_after(token, ContextKeywords.API_CALL_IN)
+                node.set_incoming_api_call(api_call=call)
+
+            if ContextKeywords.API_CALL_OUT in token:
+                call = self._get_after(token, ContextKeywords.API_CALL_OUT)
+                node.set_outgoing_api_call(api_call=call)
+
             diagram.push(node)
 
     def _handle_event(self, token: str, diagram: EpcDiagram) -> EpcNode:

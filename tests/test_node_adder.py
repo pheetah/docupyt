@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from compose import DiagramNodeAdder
-from doctree import EpcDiagram
+from doctree import ActivityNode, EpcDiagram
 from settings.language import ContextKeywords, Keywords
 
 
@@ -64,3 +64,26 @@ class TestNodeAdder(TestCase):
             "message to notification service" " user service out of range"
         )
         assert diagram.head.next is None
+
+    def test_can_separate_multiple_sources(self):
+        # Before
+        diagram = EpcDiagram()
+        TOKEN = (
+            f"# {Keywords.ACTIVITY} find related tax rates "
+            "[=] banking.rates "
+            "-> id "
+            "<- tax_rate_list, permissions"
+        )
+
+        # Test
+        self.node_adder._handle_activity(token=TOKEN, diagram=diagram)
+
+        # After
+        actvity: ActivityNode = diagram.head
+
+        assert actvity._description == "find related tax rates"
+        assert actvity._database == "banking.rates"
+        assert set(actvity._outgoing_api_calls) == set(["id"])
+        assert set(actvity._incoming_api_calls) == set(["tax_rate_list", "permissions"])
+
+        assert actvity.next is None
