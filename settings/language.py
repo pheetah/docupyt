@@ -20,6 +20,14 @@ class ContextKeywords(StringEnum):
     API_CALL_IN = "<-"
 
 
+NODE_KEYWORDS = [
+    Keywords.ACTIVITY,
+    Keywords.EVENT,
+    Keywords.IF,
+    Keywords.ELSE,
+    Keywords.ENDIF,
+]
+
 SYMBOLS = [
     Keywords.ACTIVITY,
     Keywords.EVENT,
