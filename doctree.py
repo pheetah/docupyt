@@ -65,7 +65,7 @@ class ActivityNode(EpcNode):
         self._outgoing_api_calls: list[str] = []
 
     def _parse_api_call(self, api_call: str) -> list[str]:
-        return api_call.lstrip().rstrip().split(",")
+        return list(map(lambda x: x.lstrip().rstrip(), api_call.split(",")))
 
     def set_incoming_api_call(self, api_call: str):
         calls = self._parse_api_call(api_call)
