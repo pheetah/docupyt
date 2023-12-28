@@ -5,7 +5,8 @@ on:
     branches: [main]
 
 jobs:
-  dependencies:
+
+  test:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -22,21 +23,12 @@ jobs:
       run: |
         sudo apt-get install graphviz graphviz-dev
         pip install pygraphviz
-    
-  test:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
     - name: Test with pytest
       run: |
         python -m pytest -o log_cli=true -s -vv --cov
-    needs: dependencies
-
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - name: Black Formatter
+    - name: Linting
       run: |
         python -m black .
-    needs: dependencies
+        python -m isort .
+        python -m flake8 .
+        
