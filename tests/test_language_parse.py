@@ -79,11 +79,45 @@ class TestNodeAdder(TestCase):
         self.node_adder._handle_activity(token=TOKEN, diagram=diagram)
 
         # After
-        actvity: ActivityNode = diagram.head
+        activity: ActivityNode = diagram.head
 
-        assert actvity._description == "find related tax rates"
-        assert actvity._database == "banking.rates"
-        assert set(actvity._outgoing_api_calls) == set(["id"])
-        assert set(actvity._incoming_api_calls) == set(["tax_rate_list", "permissions"])
+        assert activity._description == "find related tax rates"
+        assert activity._database == "banking.rates"
+        assert set(activity._outgoing_api_calls) == set(["id"])
+        assert set(activity._incoming_api_calls) == set(
+            ["tax_rate_list", "permissions"]
+        )
 
-        assert actvity.next is None
+        assert activity.next is None
+
+    def test_can_cascade_multiple_nodes(self):
+        # Before
+        diagram = EpcDiagram()
+        TOKEN = (
+            f"# {Keywords.ACTIVITY} find related tax rates "
+            "[=] banking.rates "
+            f"{Keywords.ACTIVITY} fetch tax rates and permissions "
+            "-> id <- tax_rate_list, permissions "
+            f"{Keywords.EVENT} payment completed"
+        )
+
+        # Test
+        self.node_adder._handle_flow(token=TOKEN, diagram=diagram)
+
+        # After
+        # Assert first node
+        first_node: ActivityNode = diagram.head
+        assert first_node._description == "find related tax rates"
+        assert first_node._database == "banking.rates"
+
+        # Assert next node
+        second_node = first_node.next
+        assert set(second_node._outgoing_api_calls) == set(["id"])
+        assert set(second_node._incoming_api_calls) == set(
+            ["tax_rate_list", "permissions"]
+        )
+
+        # Assert next node
+        third_node = second_node.next
+        assert third_node._description == "payment completed"
+        assert third_node.next is None
