@@ -7,7 +7,7 @@ from pygraphviz import AGraph
 
 from doctree import ActivityNode, EpcDiagram, EpcNode, EventNode, IfNode
 from logs import log
-from settings.language import SYMBOLS, ContextKeywords, Keywords
+from settings.language import NODE_KEYWORDS, SYMBOLS, ContextKeywords, Keywords
 
 G = AGraph(directed=True)
 
@@ -37,6 +37,19 @@ class DiagramNodeAdder:
             .rstrip()
         )
 
+    def _split_flow(self, token: str):
+        rules = "|".join(NODE_KEYWORDS)
+        regex = rf"({rules})(.*?)(?=({rules}|$))"
+        flows = [
+            x.group()
+            for x in re.finditer(
+                regex,
+                token,
+            )
+        ]
+
+        return flows
+
     def _handle_activity(self, token: str, diagram: EpcDiagram) -> EpcNode:
         if Keywords.ACTIVITY in token:
             raw_action = self._get_after(token, Keywords.ACTIVITY)
@@ -61,6 +74,12 @@ class DiagramNodeAdder:
             raw_action = self._get_after(token, Keywords.EVENT)
             diagram.push(EventNode(description=raw_action))
 
+    def _handle_flow(self, token: str, diagram: EpcDiagram):
+        flows = self._split_flow(token=token)
+        for flow in flows:
+            self._handle_activity(token=flow, diagram=diagram)
+            self._handle_event(token=flow, diagram=diagram)
+
     def _handle_if(self, sequence: TokenSequence, depth=0) -> EpcNode:
         first_element = str(sequence.pop(0))
         if Keywords.IF not in str(first_element):
@@ -68,6 +87,8 @@ class DiagramNodeAdder:
 
         if_node = copy.deepcopy(IfNode(uuid4()))
         current_branch = copy.deepcopy(EpcDiagram())
+
+        self._handle_flow(token=first_element, diagram=current_branch)
 
         depth_inner_processed_index = None
         depth_latest_index = None
@@ -94,12 +115,11 @@ class DiagramNodeAdder:
                     current_branch.push(depth_if)
                     continue
 
-            self._handle_activity(token=token, diagram=current_branch)
-            self._handle_event(token=token, diagram=current_branch)
-
             if Keywords.ELSE in token:
                 if_node.branches.append(current_branch.head)
                 current_branch = EpcDiagram()
+
+            self._handle_flow(token=token, diagram=current_branch)
 
             if Keywords.ENDIF in token:
                 if_node.branches.append(current_branch.head)
@@ -128,8 +148,7 @@ class DiagramNodeAdder:
                 diagram.push(if_node)
                 continue
 
-            self._handle_activity(token=token, diagram=diagram)
-            self._handle_event(token=token, diagram=diagram)
+            self._handle_flow(token=token, diagram=diagram)
 
         return diagram
 
