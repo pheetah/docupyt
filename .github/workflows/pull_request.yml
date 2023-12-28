@@ -35,7 +35,8 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v4
     - name: Black Formatter
       run: |
-        python -m black
+        python -m black .
     needs: dependencies
