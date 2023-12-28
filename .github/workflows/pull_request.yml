@@ -26,3 +26,9 @@ jobs:
     - name: Test with pytest
       run: |
         python -m pytest -o log_cli=true -s -vv --cov
+    - name: Linting
+      run: |
+        python -m black .
+        python -m isort .
+        python -m flake8 .
+        
