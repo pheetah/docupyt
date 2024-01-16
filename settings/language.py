@@ -20,6 +20,12 @@ class ContextKeywords(StringEnum):
     API_CALL_IN = "<-"
 
 
+class ClusterKeywords(StringEnum):
+    CLUSTER = "inner-diagram:"
+    END_CLUSTER = "end-diagram:"
+    INNER_FLOW = "inner-flow:"
+
+
 NODE_KEYWORDS = [
     Keywords.ACTIVITY,
     Keywords.EVENT,

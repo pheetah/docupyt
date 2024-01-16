@@ -3,13 +3,15 @@ import re
 from uuid import uuid4
 
 from code_tokenize.tokens import TokenSequence
-from pygraphviz import AGraph
 
-from doctree import ActivityNode, EpcDiagram, EpcNode, EventNode, IfNode
-from logs import log
-from settings.language import NODE_KEYWORDS, SYMBOLS, ContextKeywords, Keywords
-
-G = AGraph(directed=True)
+from doctree import ActivityNode, EpcDiagram, EpcNode, EventNode, IfNode, ProcessNode
+from settings.language import (
+    NODE_KEYWORDS,
+    SYMBOLS,
+    ClusterKeywords,
+    ContextKeywords,
+    Keywords,
+)
 
 
 class DiagramNodeAdder:
@@ -74,7 +76,15 @@ class DiagramNodeAdder:
             raw_action = self._get_after(token, Keywords.EVENT)
             diagram.push(EventNode(description=raw_action))
 
+    def _handle_inner_flow(self, token: str, diagram: EpcDiagram) -> EpcNode:
+        if ClusterKeywords.INNER_FLOW in token:
+            raw_name = self._get_after(token, ClusterKeywords.INNER_FLOW)
+            diagram.inner_flow_names.append(str(raw_name))
+            diagram.push(ProcessNode(description=raw_name))
+
     def _handle_flow(self, token: str, diagram: EpcDiagram):
+        self._handle_inner_flow(token=token, diagram=diagram)
+
         flows = self._split_flow(token=token)
         for flow in flows:
             self._handle_activity(token=flow, diagram=diagram)
@@ -165,15 +175,6 @@ class Composer:
 
         return diagram
 
-    def compose(self, export_to: str, parsed: TokenSequence):
+    def compose(self, parsed: TokenSequence):
         diagram = self._struct(parsed=parsed)
-        current_node = diagram.head
-
-        while current_node:
-            current_node.draw_line(G)
-            current_node = current_node.next
-
-        G.layout()
-        G.draw(export_to, prog="dot")
-
-        log.info("Done.")
+        return diagram
