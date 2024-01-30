@@ -169,6 +169,20 @@ class EventNode(EpcNode):
         )
 
 
+class ProcessNode(EpcNode):
+    def add_node(self, pygraph: pgv.AGraph, description: str):
+        pygraph.add_node(
+            description,
+            color="darkblue",
+            shape="polygon",
+            fontcolor="white",
+            style="filled",
+            fontsize=16,
+            width=4,
+            group="1",
+        )
+
+
 class IfNode(EpcNode):
     branches: list[EpcNode]
 
@@ -214,12 +228,15 @@ class IfNode(EpcNode):
 class EpcDiagram:
     head: EpcNode
     tail: EpcNode
+    inner_flow_names: list[str]
     length: int
 
-    def __init__(self) -> None:
+    def __init__(self, name: str = "EPC") -> None:
+        self.name = name
         self.head = None
         self.tail = None
         self.length = 0
+        self.inner_flow_names = []
 
     def add(self, node: EpcNode):
         self.head = node
