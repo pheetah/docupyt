@@ -54,12 +54,20 @@ class DiagramNodeAdder:
 
     def _handle_activity(self, token: str, diagram: EpcDiagram) -> EpcNode:
         if Keywords.ACTIVITY in token:
+            diagram.activity_complexity += 1
             raw_action = self._get_after(token, Keywords.ACTIVITY)
             node = ActivityNode(description=raw_action)
 
             if ContextKeywords.DATABASE in token:
                 db = self._get_after(token, ContextKeywords.DATABASE)
                 node.set_database_connection(database=db)
+                diagram.cosmic_complexity += 1
+
+            if (
+                ContextKeywords.API_CALL_IN in token
+                or ContextKeywords.API_CALL_OUT in token
+            ):
+                diagram.cosmic_complexity += 1
 
             if ContextKeywords.API_CALL_IN in token:
                 call = self._get_after(token, ContextKeywords.API_CALL_IN)
@@ -73,6 +81,7 @@ class DiagramNodeAdder:
 
     def _handle_event(self, token: str, diagram: EpcDiagram) -> EpcNode:
         if Keywords.EVENT in token:
+            diagram.event_number += 1
             raw_action = self._get_after(token, Keywords.EVENT)
             diagram.push(EventNode(description=raw_action))
 
@@ -90,7 +99,9 @@ class DiagramNodeAdder:
             self._handle_activity(token=flow, diagram=diagram)
             self._handle_event(token=flow, diagram=diagram)
 
-    def _handle_if(self, sequence: TokenSequence, depth=0) -> EpcNode:
+    def _handle_if(
+        self, sequence: TokenSequence, outer_diagram: EpcDiagram, depth=0
+    ) -> EpcNode:
         first_element = str(sequence.pop(0))
         if Keywords.IF not in str(first_element):
             return None, None
@@ -118,7 +129,9 @@ class DiagramNodeAdder:
                 # eğer diagramı içeri geçersen hem içteki hem dıştaki çizecek.
                 depth_latest_index = index
                 depth_inner_processed_index, depth_if = self._handle_if(
-                    sequence=sequence[index:], depth=depth + 1
+                    sequence=sequence[index:],
+                    outer_diagram=current_branch,
+                    depth=depth + 1,
                 )
 
                 if depth_inner_processed_index:
@@ -126,12 +139,20 @@ class DiagramNodeAdder:
                     continue
 
             if Keywords.ELSE in token:
+                outer_diagram.cosmic_complexity += current_branch.cosmic_complexity
+                outer_diagram.activity_complexity += current_branch.activity_complexity
+                outer_diagram.event_number += current_branch.event_number
+
                 if_node.branches.append(current_branch.head)
                 current_branch = EpcDiagram()
 
             self._handle_flow(token=token, diagram=current_branch)
 
             if Keywords.ENDIF in token:
+                outer_diagram.cosmic_complexity += current_branch.cosmic_complexity
+                outer_diagram.activity_complexity += current_branch.activity_complexity
+                outer_diagram.event_number += current_branch.event_number
+
                 if_node.branches.append(current_branch.head)
                 return index + 1, if_node
 
@@ -150,7 +171,7 @@ class DiagramNodeAdder:
                 continue
 
             inner_processed_index, if_node = self._handle_if(
-                sequence=token_sequence[index:]
+                sequence=token_sequence[index:], outer_diagram=diagram
             )
 
             if inner_processed_index:
