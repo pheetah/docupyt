@@ -26,6 +26,9 @@ class DocupytClient:
     def _compose_and_draw(self, pygraph: AGraph, flow: TokenSequence):
         # act: compose diagram
         diagram = self._composer.compose(parsed=flow)
+        print("COSMIC COMPLEXITY:", diagram.cosmic_complexity)
+        print("ACTIVITY COMPLEXITY:", diagram.activity_complexity)
+        print("EVENT NUMBER:", diagram.event_number)
 
         # act: draw diagram
         current_node = diagram.head
@@ -49,8 +52,24 @@ class DocupytClient:
         cluster.extract_flows(file_name_list=[file.input_path for file in file_format])
 
         for index, process in enumerate(cluster._main_flows):
-            G = AGraph(directed=True, compound=True)
+            G = AGraph(
+                directed=True,
+                compound=True,
+            )
             current_main_process = self._compose_and_draw(pygraph=G, flow=process)
+            G.graph_attr.update(
+                labelloc="t",
+                label=(
+                    "<<table border='0' cellborder='1' cellspacing='0'>"
+                    "<tr> <td> Complexity Report </td> </tr>"
+                    f"<tr> <td> <i> COSMIC COMPLEXITY: {current_main_process.cosmic_complexity} </i> </td> </tr>"
+                    f"<tr> <td> <i> ACTIVITY COMPLEXITY: {current_main_process.activity_complexity} </i> </td> </tr>"
+                    f"<tr> <td> <i> EVENT COMPLEXITY: {current_main_process.event_number} </i> </td> </tr>"
+                    "</table>>"
+                ),
+                fontcolor="darkgreen",
+            )
+
             inner_flows = [
                 flow
                 for flow in cluster._inner_flows

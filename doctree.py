@@ -229,6 +229,9 @@ class EpcDiagram:
     head: EpcNode
     tail: EpcNode
     inner_flow_names: list[str]
+    cosmic_complexity: int = 0
+    activity_complexity: int = 0
+    event_number: int = 0
     length: int
 
     def __init__(self, name: str = "EPC") -> None:
