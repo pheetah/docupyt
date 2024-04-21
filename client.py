@@ -35,7 +35,9 @@ class DocupytClient:
 
         return diagram
 
-    def _compose_and_draw_inner(self, pygraph: AGraph, flow: TokenSequence, name: str):
+    def _compose_and_draw_inner(
+        self, pygraph: AGraph, flow: TokenSequence, name: str
+    ):
         pygraph.add_subgraph(
             name=name, label=name, cluster=True, labelloc="t", fontcolor="blue"
         )
@@ -46,11 +48,16 @@ class DocupytClient:
 
     def draw_epc(self, file_format: list[FileFormat]):
         cluster = Cluster()
-        cluster.extract_flows(file_name_list=[file.input_path for file in file_format])
+        cluster.extract_flows(
+            file_name_list=[file.input_path for file in file_format]
+        )
 
-        for index, process in enumerate(cluster._main_flows):
+        main_flows = [flow.tokens for flow in cluster._main_flows]
+        for index, main_flow in enumerate(main_flows):
             G = AGraph(directed=True, compound=True)
-            current_main_process = self._compose_and_draw(pygraph=G, flow=process)
+            current_main_process = self._compose_and_draw(
+                pygraph=G, flow=main_flow
+            )
             inner_flows = [
                 flow
                 for flow in cluster._inner_flows
@@ -63,6 +70,9 @@ class DocupytClient:
 
             file = file_format[index]
             G.layout()
-            G.draw(file.output_path, prog="dot")
+            G.draw(
+                f"./_outputs/{cluster._main_flows[index].name}.png",
+                prog="dot",
+            )
 
-            log.info("Done.")
+            log.info(msg=f"{file.output_path} - Done.")
