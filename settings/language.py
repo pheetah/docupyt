@@ -24,6 +24,8 @@ class ClusterKeywords(StringEnum):
     CLUSTER = "inner-diagram:"
     END_CLUSTER = "end-diagram:"
     INNER_FLOW = "inner-flow:"
+    MAIN_CLUSTER = "main-diagram:"
+    END_MAIN_CLUSTER = "end-diagram-main:"
 
 
 NODE_KEYWORDS = [

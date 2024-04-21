@@ -20,7 +20,7 @@ class Flows:
 
 class Cluster:
     _inner_flows: list[Flow] = []
-    _main_flows: list[str] = []
+    _main_flows: list[Flow] = []
 
     def __init__(self) -> None:
         pass
@@ -45,12 +45,35 @@ class Cluster:
         if flows.latest_flow is not None:
             flows.latest_flow.tokens.append(token)
 
+    # TODO refactor repeated functionality
+    def _find_main_flows(self, token: str, index: int, flows: Flows):
+        if ClusterKeywords.MAIN_CLUSTER in token:
+            flow = deepcopy(Flow())
+            flow.name = (
+                re.search(
+                    rf"(?<={ClusterKeywords.MAIN_CLUSTER})(.*?)$", token
+                )[0]
+                .lstrip()
+                .rstrip()
+            )
+            flows.latest_flow = deepcopy(flow)
+            flows.processed_indexes.update({"start_index": index})
+
+        elif ClusterKeywords.END_MAIN_CLUSTER in token:
+            self._main_flows.append(deepcopy(flows.latest_flow))
+            flows.processed_indexes.update({"end_index": index})
+            flows.latest_flow = None
+            return True
+
+        if flows.latest_flow is not None:
+            flows.latest_flow.tokens.append(token)
+
     def extract_flows(self, file_name_list: list[str]):
         for file in file_name_list:
             parser = Parser()
             parsed = parser.parse(file)
-            flows = Flows()
 
+            flows = Flows()
             for index, token_raw in enumerate(parsed):
                 indexes_processed = self._find_inner_diagrams(
                     str(token_raw), index, flows
@@ -62,4 +85,14 @@ class Cluster:
 
                     del parsed[start_index:end_index]
 
-            self._main_flows.append(parsed)
+            main_flows = Flows()
+            for index, token_raw in enumerate(parsed):
+                indexes_processed = self._find_main_flows(
+                    str(token_raw), index, main_flows
+                )
+
+                if indexes_processed:
+                    start_index = main_flows.processed_indexes["start_index"]
+                    end_index = main_flows.processed_indexes["end_index"] + 1
+
+                    del parsed[start_index:end_index]
