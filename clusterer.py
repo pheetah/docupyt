@@ -50,9 +50,7 @@ class Cluster:
         if ClusterKeywords.MAIN_CLUSTER in token:
             flow = deepcopy(Flow())
             flow.name = (
-                re.search(
-                    rf"(?<={ClusterKeywords.MAIN_CLUSTER})(.*?)$", token
-                )[0]
+                re.search(rf"(?<={ClusterKeywords.MAIN_CLUSTER})(.*?)$", token)[0]
                 .lstrip()
                 .rstrip()
             )
@@ -90,9 +88,3 @@ class Cluster:
                 indexes_processed = self._find_main_flows(
                     str(token_raw), index, main_flows
                 )
-
-                if indexes_processed:
-                    start_index = main_flows.processed_indexes["start_index"]
-                    end_index = main_flows.processed_indexes["end_index"] + 1
-
-                    del parsed[start_index:end_index]

@@ -12,7 +12,6 @@ from logs import log
 @dataclass
 class FileFormat:
     input_path: str
-    output_path: str
 
 
 # Façade
@@ -71,7 +70,6 @@ class DocupytClient:
                     pygraph=G, flow=inner_flow.tokens, name=inner_flow.name
                 )
 
-            file = file_format[index]
             G.layout()
             G.draw(
                 f"./_outputs/{cluster._main_flows[index].name}.png",
@@ -81,4 +79,4 @@ class DocupytClient:
         ARCHG.layout()
         ARCHG.draw("./_outputs/architecture.png", prog="dot")
 
-        log.info(msg=f"{file.output_path} - Done.")
+        log.info(msg="Done.")
