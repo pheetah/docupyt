@@ -5,6 +5,70 @@ from uuid import uuid4
 import pygraphviz as pgv
 
 
+class ArchitectureManager:
+    _subscribes: list[str]
+    _publishes: list[str]
+
+    def __init__(self, name: str) -> None:
+        self._subscribes = []
+        self._publishes = []
+
+    def subscribe(self, subscribe: str):
+        self._subscribes.append(subscribe)
+
+    def publish(self, publish: str):
+        self._publishes.append(publish)
+
+    def draw_architectural(self, pygraph: pgv.AGraph, diagram_name: str):
+        for subscribe in self._subscribes:
+            pygraph.add_node(
+                diagram_name,
+                color="palegoldenrod",
+                shape="polygon",
+                fontcolor="black",
+                style="filled",
+                fontsize=16,
+                width=4,
+                group="1",
+            )
+            pygraph.add_node(
+                subscribe,
+                color="darkred",
+                shape="octagon",
+                fontcolor="white",
+                style="filled",
+                width=1.0,
+                height=0.6,
+                fixedsize=False,
+                group="1",
+            )
+            pygraph.add_edge(subscribe, diagram_name)
+
+        for publish in self._publishes:
+            pygraph.add_node(
+                diagram_name,
+                color="palegoldenrod",
+                shape="polygon",
+                fontcolor="black",
+                style="filled",
+                fontsize=16,
+                width=4,
+                group="1",
+            )
+            pygraph.add_node(
+                publish,
+                color="darkred",
+                shape="octagon",
+                fontcolor="white",
+                style="filled",
+                width=1.0,
+                height=0.6,
+                fixedsize=False,
+                group="1",
+            )
+            pygraph.add_edge(diagram_name, publish)
+
+
 class EpcNode(ABC):
     _description: str
     _start: str
@@ -53,7 +117,9 @@ class EpcNode(ABC):
                 name=self._description + self._database,
             )
             db_id = self.add_db_node(
-                pygraph=graph, description=self._database, group=self._description
+                pygraph=graph,
+                description=self._database,
+                group=self._description,
             )
             graph.add_edge(self._description, db_id)
 
@@ -187,7 +253,10 @@ class IfNode(EpcNode):
     branches: list[EpcNode]
 
     def __init__(
-        self, description: str, next: Self | None = None, branches: list[EpcNode] = []
+        self,
+        description: str,
+        next: Self | None = None,
+        branches: list[EpcNode] = [],
     ) -> None:
         super().__init__(description, next)
         self.branches = branches
@@ -230,6 +299,8 @@ class EpcDiagram:
     tail: EpcNode
     inner_flow_names: list[str]
     length: int
+    name: str
+    architecture: ArchitectureManager
 
     def __init__(self, name: str = "EPC") -> None:
         self.name = name
@@ -237,6 +308,7 @@ class EpcDiagram:
         self.tail = None
         self.length = 0
         self.inner_flow_names = []
+        self.architecture = ArchitectureManager(name)
 
     def add(self, node: EpcNode):
         self.head = node

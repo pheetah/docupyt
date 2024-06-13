@@ -8,6 +8,7 @@ from doctree import ActivityNode, EpcDiagram, EpcNode, EventNode, IfNode, Proces
 from settings.language import (
     NODE_KEYWORDS,
     SYMBOLS,
+    ArchitecturalKeywords,
     ClusterKeywords,
     ContextKeywords,
     Keywords,
@@ -52,6 +53,16 @@ class DiagramNodeAdder:
 
         return flows
 
+    def _handle_subscriptions(self, token: str, diagram: EpcDiagram) -> EpcNode:
+        if ArchitecturalKeywords.SUBSCRIBES in token:
+            raw_action = self._get_after(token, ArchitecturalKeywords.SUBSCRIBES)
+            subscriptions = list(
+                map(lambda x: x.lstrip().rstrip(), raw_action.split(","))
+            )
+
+            for subscription in subscriptions:
+                diagram.architecture.subscribe(subscription)
+
     def _handle_activity(self, token: str, diagram: EpcDiagram) -> EpcNode:
         if Keywords.ACTIVITY in token:
             raw_action = self._get_after(token, Keywords.ACTIVITY)
@@ -76,6 +87,10 @@ class DiagramNodeAdder:
             raw_action = self._get_after(token, Keywords.EVENT)
             diagram.push(EventNode(description=raw_action))
 
+            if ArchitecturalKeywords.PUBLISHES in token:
+                raw_action = self._get_after(token, ArchitecturalKeywords.PUBLISHES)
+                diagram.architecture.publish(raw_action)
+
     def _handle_inner_flow(self, token: str, diagram: EpcDiagram) -> EpcNode:
         if ClusterKeywords.INNER_FLOW in token:
             raw_name = self._get_after(token, ClusterKeywords.INNER_FLOW)
@@ -84,6 +99,7 @@ class DiagramNodeAdder:
 
     def _handle_flow(self, token: str, diagram: EpcDiagram):
         self._handle_inner_flow(token=token, diagram=diagram)
+        self._handle_subscriptions(token=token, diagram=diagram)
 
         flows = self._split_flow(token=token)
         for flow in flows:
