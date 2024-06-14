@@ -1,5 +1,6 @@
 # main
 code-tokenize==0.2.0
+typer==0.12.3
 # test
 pytest-cov==4.1.0
 pytest==7.4.3

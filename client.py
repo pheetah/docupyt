@@ -46,7 +46,7 @@ class DocupytClient:
     def _draw_architectural_connections(self, pygraph: AGraph, diagram: TokenSequence):
         diagram.architecture.draw_connections(pygraph=pygraph)
 
-    def draw_epc(self, file_format: list[FileFormat]):
+    def draw_epc(self, out_path: str, file_format: list[FileFormat]):
         cluster = Cluster()
         cluster.extract_flows(file_name_list=[file.input_path for file in file_format])
 
@@ -72,11 +72,11 @@ class DocupytClient:
 
             G.layout()
             G.draw(
-                f"./_outputs/{cluster._main_flows[index].name}.png",
+                f"./{out_path}/{cluster._main_flows[index].name}.png",
                 prog="dot",
             )
 
         ARCHG.layout()
-        ARCHG.draw("./_outputs/architecture.png", prog="dot")
+        ARCHG.draw(f"./{out_path}/architecture.png", prog="dot")
 
         log.info(msg="Done.")
