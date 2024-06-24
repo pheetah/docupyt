@@ -4,13 +4,13 @@
 /_trials
 
 # ignore outs folder
-/_outputs
+/_outputs*
 
 # ignore python cache folders
 *__pycache__
 
 # ignore test files for now
-_test_files
+_test_files*
 test_cli.py
 
 ## PYTHON

@@ -28,6 +28,11 @@ class ClusterKeywords(StringEnum):
     END_MAIN_CLUSTER = "end-diagram-main:"
 
 
+class ArchitecturalKeywords(StringEnum):
+    SUBSCRIBES = "subscribes:"
+    PUBLISHES = "publishes:"
+
+
 NODE_KEYWORDS = [
     Keywords.ACTIVITY,
     Keywords.EVENT,
@@ -45,4 +50,5 @@ SYMBOLS = [
     ContextKeywords.DATABASE,
     ContextKeywords.API_CALL_OUT,
     ContextKeywords.API_CALL_IN,
+    ArchitecturalKeywords.PUBLISHES,
 ]
