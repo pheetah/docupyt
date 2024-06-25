@@ -10,10 +10,10 @@ class IParser(ABC):
 
 
 class Parser(IParser):
-    def parse(self, file_path: str):
+    def parse(self, file_path: str, language: str):
         with open(file_path) as file:
             file_str = file.read()
             return ctok.tokenize(
                 file_str,
-                lang="python",
+                lang=language,
             )

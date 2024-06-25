@@ -46,9 +46,12 @@ class DocupytClient:
     def _draw_architectural_connections(self, pygraph: AGraph, diagram: TokenSequence):
         diagram.architecture.draw_connections(pygraph=pygraph)
 
-    def draw_epc(self, out_path: str, file_format: list[FileFormat]):
+    def draw_epc(self, out_path: str, file_format: list[FileFormat], language: str):
         cluster = Cluster()
-        cluster.extract_flows(file_name_list=[file.input_path for file in file_format])
+        cluster.extract_flows(
+            file_name_list=[file.input_path for file in file_format],
+            language=language,
+        )
 
         main_flows = [flow.tokens for flow in cluster._main_flows]
         ARCHG = AGraph(directed=True, compound=True)
