@@ -66,10 +66,10 @@ class Cluster:
         if flows.latest_flow is not None:
             flows.latest_flow.tokens.append(token)
 
-    def extract_flows(self, file_name_list: list[str]):
+    def extract_flows(self, file_name_list: list[str], language: str):
         for file in file_name_list:
             parser = Parser()
-            parsed = parser.parse(file)
+            parsed = parser.parse(file, language)
 
             flows = Flows()
             for index, token_raw in enumerate(parsed):
